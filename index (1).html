@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b162d">
+  <title>Ledgerly — Personal Budget Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <span>Ledgerly</span>
+      </div>
+
+      <div>
+        <div class="side-label">Workspace</div>
+        <nav>
+          <button type="button" class="nav-item active" data-nav="overview">
+            <span class="nav-icon" aria-hidden="true">▦</span>Overview
+          </button>
+          <button type="button" class="nav-item" data-nav="transactions">
+            <span class="nav-icon" aria-hidden="true">↗</span>Transactions
+          </button>
+          <button type="button" class="nav-item" data-nav="budgets">
+            <span class="nav-icon" aria-hidden="true">◴</span>Budgets
+          </button>
+          <button type="button" class="nav-item" data-nav="goals">
+            <span class="nav-icon" aria-hidden="true">◎</span>Goals
+          </button>
+        </nav>
+      </div>
+
+      <div>
+        <div class="side-label">Management</div>
+        <nav>
+          <button type="button" class="nav-item" data-nav="reports">
+            <span class="nav-icon" aria-hidden="true">▤</span>Export CSV
+          </button>
+          <button type="button" class="nav-item" data-nav="settings">
+            <span class="nav-icon" aria-hidden="true">⚙</span>Settings &amp; Backup
+          </button>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <strong>Local-first workspace</strong>
+        Data is saved automatically in this browser.
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Good morning, Rajan</h1>
+          <p class="sub" id="todayText">Here’s your financial snapshot.</p>
+        </div>
+        <div class="top-actions">
+          <select class="month-picker" id="monthPicker" aria-label="Choose month">
+            <option value="2026-08">August 2026</option>
+            <option value="all">All months</option>
+          </select>
+          <button type="button" class="primary" id="addButton">+ Add transaction</button>
+        </div>
+      </header>
+
+      <section class="overview" aria-label="Monthly overview">
+        <article class="metric">
+          <div class="metric-head">
+            <span>Available balance</span>
+            <span class="metric-icon" aria-hidden="true">▣</span>
+          </div>
+          <div class="metric-value" id="balance">₹0</div>
+          <div class="metric-note" id="balanceNote">Net cash position</div>
+        </article>
+
+        <article class="metric">
+          <div class="metric-head">
+            <span>Income</span>
+            <span class="metric-icon income" aria-hidden="true">↗</span>
+          </div>
+          <div class="metric-value" id="income">₹0</div>
+          <div class="metric-note"><span class="positive">↑ 8.2%</span> compared with last month</div>
+        </article>
+
+        <article class="metric">
+          <div class="metric-head">
+            <span>Expenses</span>
+            <span class="metric-icon expense" aria-hidden="true">↘</span>
+          </div>
+          <div class="metric-value" id="expenses">₹0</div>
+          <div class="metric-note" id="expenseNote">0% of your monthly income</div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel trend">
+          <div class="panel-head">
+            <div>
+              <h2>Cash flow</h2>
+              <p class="panel-caption" id="chartCaption">Cumulative income and expenses in August 2026</p>
+            </div>
+            <div class="legend" aria-hidden="true">
+              <span class="legend-item"><i class="dot income"></i>Income</span>
+              <span class="legend-item"><i class="dot expense"></i>Expenses</span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="trendChart" viewBox="0 0 700 245" role="img" aria-label="Cash flow line chart"></svg>
+          </div>
+        </article>
+
+        <article class="panel" id="budgetPanel">
+          <div class="panel-head">
+            <div>
+              <h2>Budget health</h2>
+              <p class="panel-caption">Spending against category limits</p>
+            </div>
+            <button type="button" class="link-button" id="manageBudgetsButton">Manage</button>
+          </div>
+          <div class="budget-list" id="budgetList"></div>
+        </article>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel table-panel" id="transactionsPanel">
+          <div class="panel-head table-head">
+            <div>
+              <h2>Recent transactions</h2>
+              <p class="panel-caption" id="txCountCaption">Showing latest entries</p>
+            </div>
+            <div class="table-controls">
+              <input type="search" id="searchInput" class="mini-input" placeholder="Search description or category..." aria-label="Search transactions">
+              <select id="typeFilter" class="mini-select" aria-label="Filter by transaction type">
+                <option value="all">All types</option>
+                <option value="expense">Expenses</option>
+                <option value="income">Income</option>
+              </select>
+              <button type="button" class="link-button danger-link" id="clearButton">Clear all</button>
+            </div>
+          </div>
+          <div id="transactionContent"></div>
+        </article>
+
+        <article class="panel" id="goalsPanel">
+          <div class="panel-head">
+            <div>
+              <h2>Savings goal</h2>
+              <p class="panel-caption">Emergency fund progress</p>
+            </div>
+            <button type="button" class="link-button" id="editGoalButton">Edit</button>
+          </div>
+          <div class="goal">
+            <div class="goal-balance">
+              <div class="goal-label">Current saved</div>
+              <div class="goal-money" id="goalMoney">₹0</div>
+              <div class="goal-target" id="goalTarget">of ₹1,50,000 target</div>
+              <div class="goal-progress bar"><i id="goalBar" style="width:0%"></i></div>
+              <div class="goal-bottom">
+                <span id="goalPct">0% complete</span>
+                <span id="goalRemaining">₹0 to go</span>
+              </div>
+            </div>
+          </div>
+          <div class="insight">
+            <strong>Smart insight</strong>
+            <span id="insightText">Add transactions to get a personalized savings insight.</span>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add Transaction Modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <form class="modal-card" id="transactionForm">
+      <div class="modal-head">
+        <h2 id="modalTitle">Add transaction</h2>
+        <button type="button" class="close" id="closeButton" aria-label="Close modal">×</button>
+      </div>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="description">Description</label>
+          <input id="description" required maxlength="80" placeholder="e.g. Grocery run">
+        </div>
+        <div class="field">
+          <label for="type">Type</label>
+          <select id="type">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="amount">Amount (₹)</label>
+          <input id="amount" type="number" min="1" step="1" required placeholder="0">
+        </div>
+        <div class="field">
+          <label for="category">Category</label>
+          <select id="category">
+            <option>Food &amp; dining</option>
+            <option>Home &amp; utilities</option>
+            <option>Transport</option>
+            <option>Shopping</option>
+            <option>Entertainment</option>
+            <option>Salary</option>
+            <option>Freelance</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" type="date" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="cancelButton">Cancel</button>
+        <button class="primary" type="submit">Save transaction</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Edit Goal Modal -->
+  <div class="modal" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+    <form class="modal-card" id="goalForm">
+      <div class="modal-head">
+        <h2 id="goalModalTitle">Edit savings goal</h2>
+        <button type="button" class="close" id="closeGoalButton" aria-label="Close modal">×</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="goalCurrentInput">Current saved (₹)</label>
+          <input id="goalCurrentInput" type="number" min="0" step="1" required>
+        </div>
+        <div class="field">
+          <label for="goalTargetInput">Goal target (₹)</label>
+          <input id="goalTargetInput" type="number" min="1" step="1" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="cancelGoalButton">Cancel</button>
+        <button class="primary" type="submit">Save goal</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Manage Budgets Modal -->
+  <div class="modal" id="budgetModal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+    <form class="modal-card" id="budgetForm">
+      <div class="modal-head">
+        <h2 id="budgetModalTitle">Manage monthly budgets</h2>
+        <button type="button" class="close" id="closeBudgetButton" aria-label="Close modal">×</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="foodBudget">Food &amp; dining (₹)</label>
+          <input id="foodBudget" type="number" min="1" step="500" required>
+        </div>
+        <div class="field">
+          <label for="homeBudget">Home &amp; utilities (₹)</label>
+          <input id="homeBudget" type="number" min="1" step="500" required>
+        </div>
+        <div class="field">
+          <label for="transportBudget">Transport (₹)</label>
+          <input id="transportBudget" type="number" min="1" step="500" required>
+        </div>
+        <div class="field">
+          <label for="shoppingBudget">Shopping (₹)</label>
+          <input id="shoppingBudget" type="number" min="1" step="500" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="cancelBudgetButton">Cancel</button>
+        <button class="primary" type="submit">Save budgets</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Settings & Backup Modal -->
+  <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="settingsModalTitle">Settings &amp; Backup</h2>
+        <button type="button" class="close" id="closeSettingsButton" aria-label="Close modal">×</button>
+      </div>
+      <p class="panel-caption" style="margin:0 0 18px">
+        Your data lives locally in this browser. Export a JSON snapshot to back up or move your data, or restore the sample dataset.
+      </p>
+      <div class="backup-row">
+        <button type="button" class="secondary" id="exportJsonButton">Export JSON</button>
+        <label class="secondary file-label" for="importJsonInput">Import JSON</label>
+        <input type="file" id="importJsonInput" accept="application/json" hidden>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="cancelSettingsButton">Close</button>
+        <button type="button" class="primary" id="resetSettingsButton">Restore sample data</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>
